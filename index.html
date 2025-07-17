@@ -1,128 +1,174 @@
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jurnal Guru</title>
-    <style>
-        body { font-family: Arial, sans-serif; padding: 20px; }
-        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
-        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-        textarea { width: 100%; }
-        input[type="text"], input[type="date"] { width: 100%; padding: 4px; }
-        #infoUmum p { margin: 4px 0; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jurnal Guru</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 900px; }
+    form { display: flex; flex-wrap: wrap; gap: 10px; }
+    label { width: 100%; }
+    input, select, textarea, button { width: 100%; padding: 8px; box-sizing: border-box; }
+    .half { width: 48%; }
+    table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #f9f9f9; }
+    .actions button { margin-right: 5px; }
+  </style>
 </head>
 <body>
-    <h2>Form Jurnal Guru</h2>
-    <form id="jurnalForm">
-        <input type="text" id="namaGuru" placeholder="Nama Guru"><br>
-        <input type="date" id="tanggal"><br>
-        <input type="text" id="kelas" placeholder="Kelas"><br>
-        <input type="text" id="mapel" placeholder="Mapel"><br>
-        <input type="number" id="pertemuan" placeholder="Pertemuan ke"><br>
-        <textarea id="materi" placeholder="Ruang Lingkup Materi"></textarea><br>
-        <textarea id="tujuan" placeholder="Tujuan Pembelajaran"></textarea><br>
-        <textarea id="kegiatan" placeholder="Kegiatan Pembelajaran"></textarea><br>
-        <textarea id="materiLanjut" placeholder="Materi Selanjutnya"></textarea><br>
-        <textarea id="refleksi" placeholder="Refleksi"></textarea><br>
-        <textarea id="absen" placeholder="Absen"></textarea><br>
-        <button type="submit">Simpan</button>
-    </form>
 
-    <h3>Filter & Export</h3>
-    <input type="text" id="filterGuru" placeholder="Nama Guru">
-    <input type="date" id="filterMulai">
-    <input type="date" id="filterAkhir">
-    <button onclick="filterData()">Terapkan Filter</button>
-    <button onclick="exportExcel()">Export ke Excel</button>
+<h2>Form Jurnal Guru</h2>
+<form id="jurnalForm">
+  <input class="half" type="text" id="namaGuru" placeholder="Nama Guru" required>
+  <input class="half" type="text" id="kelas" placeholder="Kelas" required>
+  <input class="half" type="text" id="mapel" placeholder="Mapel" required>
+  <input class="half" type="date" id="tanggal" required>
+  <input class="half" type="number" id="pertemuan" placeholder="Pertemuan ke" required>
 
-    <div id="infoUmum">
-        <p><strong>Nama Guru:</strong> <span id="infoNamaGuru"></span></p>
-        <p><strong>Kelas:</strong> <span id="infoKelas"></span></p>
-        <p><strong>Mapel:</strong> <span id="infoMapel"></span></p>
-        <p><strong>Tahun Pelajaran:</strong> 2024/2025</p>
-        <p><strong>Semester:</strong> Ganjil</p>
-        <p><strong>Tanggal:</strong> <span id="infoTanggal"></span></p>
-    </div>
+  <div class="half">
+    <label>Ruang Lingkup Materi</label>
+    <select id="materiSelect">
+      <option value="">-- Pilih Materi --</option>
+    </select>
+    <input type="text" id="materiInput" placeholder="Tambah Materi Baru">
+    <button type="button" onclick="tambahMateri()">Tambah Materi</button>
+  </div>
 
-    <h3>Daftar Jurnal</h3>
-    <table id="tabelJurnal">
-        <thead>
-            <tr>
-                <th>No</th>
-                <th>Nama Siswa</th>
-                <th>Pertemuan Ke</th>
-                <th>Ruang Lingkup Materi</th>
-                <th>Tujuan Pembelajaran</th>
-                <th>Kegiatan Pembelajaran</th>
-                <th>Materi Selanjutnya</th>
-                <th>Refleksi</th>
-                <th>Absen</th>
-            </tr>
-        </thead>
-        <tbody id="bodyJurnal"></tbody>
-    </table>
+  <div class="half">
+    <label>Kegiatan Pembelajaran</label>
+    <select id="kegiatanSelect">
+      <option value="">-- Pilih Kegiatan --</option>
+    </select>
+    <input type="text" id="kegiatanInput" placeholder="Tambah Kegiatan Baru">
+    <button type="button" onclick="tambahKegiatan()">Tambah Kegiatan</button>
+  </div>
 
-    <script>
-        const form = document.getElementById('jurnalForm');
-        const bodyJurnal = document.getElementById('bodyJurnal');
+  <textarea id="tujuan" placeholder="TP Hari Ini" required></textarea>
+  <textarea id="materiLanjut" placeholder="Materi Selanjutnya"></textarea>
+  <textarea id="refleksi" placeholder="Refleksi"></textarea>
+  <textarea id="absen" placeholder="Absen"></textarea>
+  <button type="submit">Simpan</button>
+</form>
 
-        let data = [];
+<h3>Daftar Jurnal</h3>
+<table>
+  <thead>
+    <tr>
+      <th>No</th>
+      <th>Nama Guru</th>
+      <th>Tanggal</th>
+      <th>Pertemuan</th>
+      <th>Materi</th>
+      <th>TP Hari Ini</th>
+      <th>Kegiatan</th>
+      <th>Aksi</th>
+    </tr>
+  </thead>
+  <tbody id="tabelJurnal"></tbody>
+</table>
 
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const namaGuru = document.getElementById('namaGuru').value;
-            const tanggal = document.getElementById('tanggal').value;
-            const kelas = document.getElementById('kelas').value;
-            const mapel = document.getElementById('mapel').value;
-            const pertemuan = document.getElementById('pertemuan').value;
-            const materi = document.getElementById('materi').value;
-            const tujuan = document.getElementById('tujuan').value;
-            const kegiatan = document.getElementById('kegiatan').value;
-            const materiLanjut = document.getElementById('materiLanjut').value;
-            const refleksi = document.getElementById('refleksi').value;
-            const absen = document.getElementById('absen').value;
+<script>
+  const data = [];
+  const materiList = [];
+  const kegiatanList = [];
 
-            document.getElementById('infoNamaGuru').innerText = namaGuru;
-            document.getElementById('infoKelas').innerText = kelas;
-            document.getElementById('infoMapel').innerText = mapel;
-            document.getElementById('infoTanggal').innerText = tanggal;
+  const form = document.getElementById('jurnalForm');
+  const tabelJurnal = document.getElementById('tabelJurnal');
 
-            data.push({
-                namaGuru, tanggal, kelas, mapel, pertemuan,
-                materi, tujuan, kegiatan, materiLanjut, refleksi, absen
-            });
-            tampilkanData();
-            form.reset();
-        });
+  form.addEventListener('submit', function(e) {
+    e.preventDefault();
+    const entry = {
+      namaGuru: document.getElementById('namaGuru').value,
+      kelas: document.getElementById('kelas').value,
+      mapel: document.getElementById('mapel').value,
+      tanggal: document.getElementById('tanggal').value,
+      pertemuan: document.getElementById('pertemuan').value,
+      materi: document.getElementById('materiSelect').value,
+      tujuan: document.getElementById('tujuan').value,
+      kegiatan: document.getElementById('kegiatanSelect').value,
+      materiLanjut: document.getElementById('materiLanjut').value,
+      refleksi: document.getElementById('refleksi').value,
+      absen: document.getElementById('absen').value
+    };
+    data.push(entry);
+    tampilkanData();
+    form.reset();
+  });
 
-        function tampilkanData() {
-            bodyJurnal.innerHTML = "";
-            data.forEach((d, i) => {
-                const row = `<tr>
-                    <td>${i + 1}</td>
-                    <td>${d.namaGuru}</td>
-                    <td>${d.pertemuan}</td>
-                    <td>${d.materi}</td>
-                    <td>${d.tujuan}</td>
-                    <td>${d.kegiatan}</td>
-                    <td>${d.materiLanjut}</td>
-                    <td>${d.refleksi}</td>
-                    <td>${d.absen}</td>
-                </tr>`;
-                bodyJurnal.innerHTML += row;
-            });
-        }
+  function tampilkanData() {
+    tabelJurnal.innerHTML = "";
+    data.forEach((d, i) => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${i+1}</td>
+        <td>${d.namaGuru}</td>
+        <td>${d.tanggal}</td>
+        <td>${d.pertemuan}</td>
+        <td>${d.materi}</td>
+        <td>${d.tujuan}</td>
+        <td>${d.kegiatan}</td>
+        <td class="actions">
+          <button onclick="alert('Review Data ke-${i+1}')">Review</button>
+          <button onclick="editData(${i})">Edit</button>
+          <button onclick="hapusData(${i})">Hapus</button>
+        </td>
+      `;
+      tabelJurnal.appendChild(row);
+    });
+  }
 
-        function filterData() {
-            alert("Filter belum diaktifkan (contoh saja)");
-        }
+  function tambahMateri() {
+    const input = document.getElementById('materiInput');
+    const value = input.value.trim();
+    if (value && !materiList.includes(value)) {
+      materiList.push(value);
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value;
+      document.getElementById('materiSelect').appendChild(opt);
+      input.value = "";
+    }
+  }
 
-        function exportExcel() {
-            alert("Export ke Excel belum diaktifkan (contoh saja)");
-        }
-    </script>
+  function tambahKegiatan() {
+    const input = document.getElementById('kegiatanInput');
+    const value = input.value.trim();
+    if (value && !kegiatanList.includes(value)) {
+      kegiatanList.push(value);
+      const opt = document.createElement('option');
+      opt.value = value;
+      opt.textContent = value;
+      document.getElementById('kegiatanSelect').appendChild(opt);
+      input.value = "";
+    }
+  }
+
+  function hapusData(index) {
+    if (confirm("Yakin hapus data ini?")) {
+      data.splice(index, 1);
+      tampilkanData();
+    }
+  }
+
+  function editData(index) {
+    const d = data[index];
+    document.getElementById('namaGuru').value = d.namaGuru;
+    document.getElementById('kelas').value = d.kelas;
+    document.getElementById('mapel').value = d.mapel;
+    document.getElementById('tanggal').value = d.tanggal;
+    document.getElementById('pertemuan').value = d.pertemuan;
+    document.getElementById('materiSelect').value = d.materi;
+    document.getElementById('tujuan').value = d.tujuan;
+    document.getElementById('kegiatanSelect').value = d.kegiatan;
+    document.getElementById('materiLanjut').value = d.materiLanjut;
+    document.getElementById('refleksi').value = d.refleksi;
+    document.getElementById('absen').value = d.absen;
+    data.splice(index, 1); // remove old entry
+    tampilkanData();
+  }
+</script>
+
 </body>
 </html>
