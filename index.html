@@ -1,181 +1,128 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>Jurnal Guru + Filter + Excel (Tabel)</title>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore-compat.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-  <style>
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      margin-top: 10px;
-    }
-    th, td {
-      border: 1px solid #999;
-      padding: 8px;
-      text-align: left;
-      font-size: 14px;
-    }
-    th {
-      background-color: #eee;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal Guru</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        textarea { width: 100%; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 4px; }
+        #infoUmum p { margin: 4px 0; }
+    </style>
 </head>
 <body>
-  <h2>Form Jurnal Guru</h2>
-  <form id="jurnalForm">
-    <input type="text" id="nama_guru" placeholder="Nama Guru" required><br>
-    <input type="date" id="tanggal" required><br>
-    <input type="text" id="kelas" placeholder="Kelas" required><br>
-    <input type="text" id="mapel" placeholder="Mapel" required><br>
-    <input type="number" id="jam_ke" placeholder="Jam Ke-" required><br>
-    <textarea id="materi" placeholder="Materi" required></textarea><br>
-    <textarea id="refleksi" placeholder="Refleksi"></textarea><br>
-    <textarea id="absen" placeholder="Siswa Tidak Hadir"></textarea><br>
-    <button type="submit">Simpan</button>
-  </form>
+    <h2>Form Jurnal Guru</h2>
+    <form id="jurnalForm">
+        <input type="text" id="namaGuru" placeholder="Nama Guru"><br>
+        <input type="date" id="tanggal"><br>
+        <input type="text" id="kelas" placeholder="Kelas"><br>
+        <input type="text" id="mapel" placeholder="Mapel"><br>
+        <input type="number" id="pertemuan" placeholder="Pertemuan ke"><br>
+        <textarea id="materi" placeholder="Ruang Lingkup Materi"></textarea><br>
+        <textarea id="tujuan" placeholder="Tujuan Pembelajaran"></textarea><br>
+        <textarea id="kegiatan" placeholder="Kegiatan Pembelajaran"></textarea><br>
+        <textarea id="materiLanjut" placeholder="Materi Selanjutnya"></textarea><br>
+        <textarea id="refleksi" placeholder="Refleksi"></textarea><br>
+        <textarea id="absen" placeholder="Absen"></textarea><br>
+        <button type="submit">Simpan</button>
+    </form>
 
-  <hr>
-  <h3>Filter & Export</h3>
-  <label>Nama Guru: <input type="text" id="filterNama"></label>
-  <label>Tanggal Mulai: <input type="date" id="filterStart"></label>
-  <label>Tanggal Akhir: <input type="date" id="filterEnd"></label>
-  <button onclick="tampilkanJurnal()">Terapkan Filter</button>
-  <button onclick="exportToExcel()">Export ke Excel</button>
-  <p id="status" style="color: red;"></p>
+    <h3>Filter & Export</h3>
+    <input type="text" id="filterGuru" placeholder="Nama Guru">
+    <input type="date" id="filterMulai">
+    <input type="date" id="filterAkhir">
+    <button onclick="filterData()">Terapkan Filter</button>
+    <button onclick="exportExcel()">Export ke Excel</button>
 
-  <h3>Daftar Jurnal</h3>
-  <table>
-    <thead>
-      <tr>
-        <th>Tanggal</th>
-        <th>Nama Guru</th>
-        <th>Kelas</th>
-        <th>Mapel</th>
-        <th>Jam Ke</th>
-        <th>Materi</th>
-        <th>Refleksi</th>
-        <th>Absen</th>
-        <th>Aksi</th>
-      </tr>
-    </thead>
-    <tbody id="jurnalList"></tbody>
-  </table>
+    <div id="infoUmum">
+        <p><strong>Nama Guru:</strong> <span id="infoNamaGuru"></span></p>
+        <p><strong>Kelas:</strong> <span id="infoKelas"></span></p>
+        <p><strong>Mapel:</strong> <span id="infoMapel"></span></p>
+        <p><strong>Tahun Pelajaran:</strong> 2024/2025</p>
+        <p><strong>Semester:</strong> Ganjil</p>
+        <p><strong>Tanggal:</strong> <span id="infoTanggal"></span></p>
+    </div>
 
-  <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyD-F64-CTbjC4TEjkSTcza8lJRmytUGGtU",
-      authDomain: "jurnal-guru-app.firebaseapp.com",
-      projectId: "jurnal-guru-app",
-      storageBucket: "jurnal-guru-app.appspot.com",
-      messagingSenderId: "132021751020",
-      appId: "1:132021751020:web:732628c375933132d6a9c9",
-      measurementId: "G-R1FFDHE8HN"
-    };
+    <h3>Daftar Jurnal</h3>
+    <table id="tabelJurnal">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Siswa</th>
+                <th>Pertemuan Ke</th>
+                <th>Ruang Lingkup Materi</th>
+                <th>Tujuan Pembelajaran</th>
+                <th>Kegiatan Pembelajaran</th>
+                <th>Materi Selanjutnya</th>
+                <th>Refleksi</th>
+                <th>Absen</th>
+            </tr>
+        </thead>
+        <tbody id="bodyJurnal"></tbody>
+    </table>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.firestore();
-    let semuaData = [];
+    <script>
+        const form = document.getElementById('jurnalForm');
+        const bodyJurnal = document.getElementById('bodyJurnal');
 
-    document.getElementById("jurnalForm").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const status = document.getElementById("status");
-      status.textContent = "";
+        let data = [];
 
-      try {
-        await db.collection("jurnal").add({
-          nama_guru: document.getElementById("nama_guru").value,
-          tanggal: document.getElementById("tanggal").value,
-          kelas: document.getElementById("kelas").value,
-          mapel: document.getElementById("mapel").value,
-          jam_ke: document.getElementById("jam_ke").value,
-          materi: document.getElementById("materi").value,
-          refleksi: document.getElementById("refleksi").value,
-          absen: document.getElementById("absen").value,
-          waktu_input: new Date()
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const namaGuru = document.getElementById('namaGuru').value;
+            const tanggal = document.getElementById('tanggal').value;
+            const kelas = document.getElementById('kelas').value;
+            const mapel = document.getElementById('mapel').value;
+            const pertemuan = document.getElementById('pertemuan').value;
+            const materi = document.getElementById('materi').value;
+            const tujuan = document.getElementById('tujuan').value;
+            const kegiatan = document.getElementById('kegiatan').value;
+            const materiLanjut = document.getElementById('materiLanjut').value;
+            const refleksi = document.getElementById('refleksi').value;
+            const absen = document.getElementById('absen').value;
+
+            document.getElementById('infoNamaGuru').innerText = namaGuru;
+            document.getElementById('infoKelas').innerText = kelas;
+            document.getElementById('infoMapel').innerText = mapel;
+            document.getElementById('infoTanggal').innerText = tanggal;
+
+            data.push({
+                namaGuru, tanggal, kelas, mapel, pertemuan,
+                materi, tujuan, kegiatan, materiLanjut, refleksi, absen
+            });
+            tampilkanData();
+            form.reset();
         });
-        alert("Jurnal disimpan!");
-        document.getElementById("jurnalForm").reset();
-        tampilkanJurnal();
-      } catch (error) {
-        status.textContent = "Gagal simpan jurnal: " + error.message;
-      }
-    });
 
-    async function tampilkanJurnal() {
-      const list = document.getElementById("jurnalList");
-      list.innerHTML = "";
-      semuaData = [];
-
-      const filterNama = document.getElementById("filterNama").value.toLowerCase();
-      const filterStart = document.getElementById("filterStart").value;
-      const filterEnd = document.getElementById("filterEnd").value;
-
-      try {
-        const snapshot = await db.collection("jurnal").orderBy("tanggal", "desc").get();
-        snapshot.forEach(doc => {
-          const data = doc.data();
-          if (
-            (!filterNama || data.nama_guru.toLowerCase().includes(filterNama)) &&
-            (!filterStart || data.tanggal >= filterStart) &&
-            (!filterEnd || data.tanggal <= filterEnd)
-          ) {
-            semuaData.push({ id: doc.id, ...data });
-            list.innerHTML += `
-              <tr>
-                <td>${data.tanggal}</td>
-                <td>${data.nama_guru}</td>
-                <td>${data.kelas}</td>
-                <td>${data.mapel}</td>
-                <td>${data.jam_ke}</td>
-                <td>${data.materi}</td>
-                <td>${data.refleksi || '-'}</td>
-                <td>${data.absen || '-'}</td>
-                <td><button onclick="hapusJurnal('${doc.id}')">Hapus</button></td>
-              </tr>`;
-          }
-        });
-      } catch (error) {
-        document.getElementById("status").textContent = "Gagal tampilkan data: " + error.message;
-      }
-    }
-
-    async function hapusJurnal(id) {
-      if (confirm("Yakin ingin menghapus jurnal ini?")) {
-        try {
-          await db.collection("jurnal").doc(id).delete();
-          alert("Jurnal berhasil dihapus.");
-          tampilkanJurnal();
-        } catch (error) {
-          alert("Gagal menghapus: " + error.message);
+        function tampilkanData() {
+            bodyJurnal.innerHTML = "";
+            data.forEach((d, i) => {
+                const row = `<tr>
+                    <td>${i + 1}</td>
+                    <td>${d.namaGuru}</td>
+                    <td>${d.pertemuan}</td>
+                    <td>${d.materi}</td>
+                    <td>${d.tujuan}</td>
+                    <td>${d.kegiatan}</td>
+                    <td>${d.materiLanjut}</td>
+                    <td>${d.refleksi}</td>
+                    <td>${d.absen}</td>
+                </tr>`;
+                bodyJurnal.innerHTML += row;
+            });
         }
-      }
-    }
 
-    function exportToExcel() {
-      if (semuaData.length === 0) {
-        alert("Tidak ada data untuk diekspor.");
-        return;
-      }
-      const dataSheet = semuaData.map((item, index) => ({
-        No: index + 1,
-        Tanggal: item.tanggal,
-        Nama_Guru: item.nama_guru,
-        Kelas: item.kelas,
-        Mapel: item.mapel,
-        Jam_Ke: item.jam_ke,
-        Materi: item.materi,
-        Refleksi: item.refleksi,
-        Absen: item.absen
-      }));
-      const worksheet = XLSX.utils.json_to_sheet(dataSheet);
-      const workbook = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(workbook, worksheet, "JurnalGuru");
-      XLSX.writeFile(workbook, "jurnal_guru.xlsx");
-    }
+        function filterData() {
+            alert("Filter belum diaktifkan (contoh saja)");
+        }
 
-    tampilkanJurnal();
-  </script>
+        function exportExcel() {
+            alert("Export ke Excel belum diaktifkan (contoh saja)");
+        }
+    </script>
 </body>
 </html>
