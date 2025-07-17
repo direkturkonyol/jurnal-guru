@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jurnal Guru</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; }
+        table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+        th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        textarea { width: 100%; }
+        input[type="text"], input[type="date"] { width: 100%; padding: 4px; }
+        #infoUmum p { margin: 4px 0; }
+    </style>
+</head>
+<body>
+    <h2>Form Jurnal Guru</h2>
+    <form id="jurnalForm">
+        <input type="text" id="namaGuru" placeholder="Nama Guru"><br>
+        <input type="date" id="tanggal"><br>
+        <input type="text" id="kelas" placeholder="Kelas"><br>
+        <input type="text" id="mapel" placeholder="Mapel"><br>
+        <input type="number" id="pertemuan" placeholder="Pertemuan ke"><br>
+        <textarea id="materi" placeholder="Ruang Lingkup Materi"></textarea><br>
+        <textarea id="tujuan" placeholder="Tujuan Pembelajaran"></textarea><br>
+        <textarea id="kegiatan" placeholder="Kegiatan Pembelajaran"></textarea><br>
+        <textarea id="materiLanjut" placeholder="Materi Selanjutnya"></textarea><br>
+        <textarea id="refleksi" placeholder="Refleksi"></textarea><br>
+        <textarea id="absen" placeholder="Absen"></textarea><br>
+        <button type="submit">Simpan</button>
+    </form>
+
+    <h3>Filter & Export</h3>
+    <input type="text" id="filterGuru" placeholder="Nama Guru">
+    <input type="date" id="filterMulai">
+    <input type="date" id="filterAkhir">
+    <button onclick="filterData()">Terapkan Filter</button>
+    <button onclick="exportExcel()">Export ke Excel</button>
+
+    <div id="infoUmum">
+        <p><strong>Nama Guru:</strong> <span id="infoNamaGuru"></span></p>
+        <p><strong>Kelas:</strong> <span id="infoKelas"></span></p>
+        <p><strong>Mapel:</strong> <span id="infoMapel"></span></p>
+        <p><strong>Tahun Pelajaran:</strong> 2024/2025</p>
+        <p><strong>Semester:</strong> Ganjil</p>
+        <p><strong>Tanggal:</strong> <span id="infoTanggal"></span></p>
+    </div>
+
+    <h3>Daftar Jurnal</h3>
+    <table id="tabelJurnal">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Siswa</th>
+                <th>Pertemuan Ke</th>
+                <th>Ruang Lingkup Materi</th>
+                <th>Tujuan Pembelajaran</th>
+                <th>Kegiatan Pembelajaran</th>
+                <th>Materi Selanjutnya</th>
+                <th>Refleksi</th>
+                <th>Absen</th>
+            </tr>
+        </thead>
+        <tbody id="bodyJurnal"></tbody>
+    </table>
+
+    <script>
+        const form = document.getElementById('jurnalForm');
+        const bodyJurnal = document.getElementById('bodyJurnal');
+
+        let data = [];
+
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            const namaGuru = document.getElementById('namaGuru').value;
+            const tanggal = document.getElementById('tanggal').value;
+            const kelas = document.getElementById('kelas').value;
+            const mapel = document.getElementById('mapel').value;
+            const pertemuan = document.getElementById('pertemuan').value;
+            const materi = document.getElementById('materi').value;
+            const tujuan = document.getElementById('tujuan').value;
+            const kegiatan = document.getElementById('kegiatan').value;
+            const materiLanjut = document.getElementById('materiLanjut').value;
+            const refleksi = document.getElementById('refleksi').value;
+            const absen = document.getElementById('absen').value;
+
+            document.getElementById('infoNamaGuru').innerText = namaGuru;
+            document.getElementById('infoKelas').innerText = kelas;
+            document.getElementById('infoMapel').innerText = mapel;
+            document.getElementById('infoTanggal').innerText = tanggal;
+
+            data.push({
+                namaGuru, tanggal, kelas, mapel, pertemuan,
+                materi, tujuan, kegiatan, materiLanjut, refleksi, absen
+            });
+            tampilkanData();
+            form.reset();
+        });
+
+        function tampilkanData() {
+            bodyJurnal.innerHTML = "";
+            data.forEach((d, i) => {
+                const row = `<tr>
+                    <td>${i + 1}</td>
+                    <td>${d.namaGuru}</td>
+                    <td>${d.pertemuan}</td>
+                    <td>${d.materi}</td>
+                    <td>${d.tujuan}</td>
+                    <td>${d.kegiatan}</td>
+                    <td>${d.materiLanjut}</td>
+                    <td>${d.refleksi}</td>
+                    <td>${d.absen}</td>
+                </tr>`;
+                bodyJurnal.innerHTML += row;
+            });
+        }
+
+        function filterData() {
+            alert("Filter belum diaktifkan (contoh saja)");
+        }
+
+        function exportExcel() {
+            alert("Export ke Excel belum diaktifkan (contoh saja)");
+        }
+    </script>
+</body>
+</html>
